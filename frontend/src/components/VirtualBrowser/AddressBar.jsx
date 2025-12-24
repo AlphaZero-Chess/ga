@@ -161,6 +161,7 @@ const AddressBar = ({
       {/* Navigation buttons */}
       <div className="flex items-center gap-1">
         <button
+          data-testid="nav-back-button"
           onClick={onBack}
           disabled={!canGoBack}
           className={cn(
@@ -175,6 +176,7 @@ const AddressBar = ({
         </button>
         
         <button
+          data-testid="nav-forward-button"
           onClick={onForward}
           disabled={!canGoForward}
           className={cn(
@@ -189,6 +191,7 @@ const AddressBar = ({
         </button>
         
         <button
+          data-testid="nav-refresh-stop-button"
           onClick={isLoading ? onStop : onRefresh}
           className="p-2 rounded-full text-zinc-300 hover:text-white hover:bg-zinc-700/50 transition-all duration-150"
           title={isLoading ? 'Stop (Esc)' : 'Refresh (Ctrl+R)'}
@@ -201,6 +204,7 @@ const AddressBar = ({
         </button>
         
         <button
+          data-testid="nav-home-button"
           onClick={onHome}
           className="p-2 rounded-full text-zinc-300 hover:text-white hover:bg-zinc-700/50 transition-all duration-150"
           title="Home (Alt+Home)"
@@ -224,6 +228,7 @@ const AddressBar = ({
             
             {/* URL input */}
             <input
+              data-testid="address-bar-input"
               ref={inputRef}
               data-address-input
               type="text"
@@ -258,6 +263,7 @@ const AddressBar = ({
             </div>
             {suggestions.map((suggestion, index) => (
               <button
+                data-testid={`address-bar-suggestion-${index}`}
                 key={index}
                 onClick={() => handleSuggestionClick(suggestion)}
                 className={cn(
@@ -277,6 +283,7 @@ const AddressBar = ({
 
       {/* Bookmark button */}
       <button
+        data-testid="bookmark-button"
         onClick={onBookmark}
         className="p-2 rounded-full text-zinc-300 hover:text-amber-400 hover:bg-zinc-700/50 transition-all duration-150"
         title="Bookmark this page (Ctrl+D)"

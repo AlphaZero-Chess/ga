@@ -1,20 +1,41 @@
 // Browser API Service - Real backend integration
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '/api';
+// NOTE (hardening): we intentionally do NOT fall back to a hardcoded '/api'.
+// All requests must use REACT_APP_BACKEND_URL.
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+const requireBackendUrl = () => {
+  if (!BACKEND_URL) {
+    // Keep UI running, but make API calls fail loudly and consistently.
+    throw new Error(
+      "Missing REACT_APP_BACKEND_URL. Set it in your environment (must include '/api' prefix).",
+    );
+  }
+  return BACKEND_URL;
+};
+
+const joinUrl = (base, path) => {
+  // base can be '/api' or 'https://host/api'.
+  const u = new URL(base, window.location.origin);
+  const basePath = u.pathname.replace(/\/+$/, "");
+  const addPath = path.replace(/^\/+/, "");
+  u.pathname = `${basePath}/${addPath}`;
+  return u.toString();
+};
 
 // Helper to get WebSocket URL for browser streaming.
-// We derive the WS host from the same base used for API requests.
-// This avoids mismatches when the app is served behind a proxy.
+// We derive WS scheme/host AND preserve the backend base path.
 const getWsUrl = () => {
-  const apiUrl = new URL(BACKEND_URL, window.location.origin);
+  const apiBase = requireBackendUrl();
+  const apiUrl = new URL(apiBase, window.location.origin);
   const wsProtocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${wsProtocol}//${apiUrl.host}`;
+  return `${wsProtocol}//${apiUrl.host}${apiUrl.pathname.replace(/\/+$/, "")}`;
 };
 
 // Browser Session APIs
 export const browserApi = {
   // Create a new browser session
   createSession: async () => {
-    const response = await fetch(`${BACKEND_URL}/browser/session`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), '/browser/session'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -27,7 +48,7 @@ export const browserApi = {
 
   // Close a browser session
   closeSession: async (sessionId) => {
-    const response = await fetch(`${BACKEND_URL}/browser/session/${sessionId}`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/session/${sessionId}`), {
       method: 'DELETE',
     });
     if (!response.ok) {
@@ -39,7 +60,7 @@ export const browserApi = {
 
   // Get session status
   getSessionStatus: async (sessionId) => {
-    const response = await fetch(`${BACKEND_URL}/browser/session/${sessionId}/status`);
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/session/${sessionId}/status`));
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.detail || 'Failed to get session status');
@@ -49,7 +70,7 @@ export const browserApi = {
 
   // Navigate to URL
   navigate: async (sessionId, url) => {
-    const response = await fetch(`${BACKEND_URL}/browser/${sessionId}/navigate`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/${sessionId}/navigate`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),
@@ -63,7 +84,7 @@ export const browserApi = {
 
   // Go back
   goBack: async (sessionId) => {
-    const response = await fetch(`${BACKEND_URL}/browser/${sessionId}/back`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/${sessionId}/back`), {
       method: 'POST',
     });
     return response.json();
@@ -71,7 +92,7 @@ export const browserApi = {
 
   // Go forward
   goForward: async (sessionId) => {
-    const response = await fetch(`${BACKEND_URL}/browser/${sessionId}/forward`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/${sessionId}/forward`), {
       method: 'POST',
     });
     return response.json();
@@ -79,7 +100,7 @@ export const browserApi = {
 
   // Refresh page
   refresh: async (sessionId) => {
-    const response = await fetch(`${BACKEND_URL}/browser/${sessionId}/refresh`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/${sessionId}/refresh`), {
       method: 'POST',
     });
     return response.json();
@@ -87,7 +108,7 @@ export const browserApi = {
 
   // Get screenshot
   getScreenshot: async (sessionId) => {
-    const response = await fetch(`${BACKEND_URL}/browser/${sessionId}/screenshot`);
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/${sessionId}/screenshot`));
     if (!response.ok) {
       throw new Error('Failed to get screenshot');
     }
@@ -96,7 +117,7 @@ export const browserApi = {
 
   // Click
   click: async (sessionId, x, y, button = 'left') => {
-    const response = await fetch(`${BACKEND_URL}/browser/${sessionId}/click`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/${sessionId}/click`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ x, y, button }),
@@ -106,7 +127,7 @@ export const browserApi = {
 
   // Type text
   type: async (sessionId, text) => {
-    const response = await fetch(`${BACKEND_URL}/browser/${sessionId}/type`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/${sessionId}/type`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
@@ -116,7 +137,7 @@ export const browserApi = {
 
   // Key press
   keypress: async (sessionId, key, modifiers = {}) => {
-    const response = await fetch(`${BACKEND_URL}/browser/${sessionId}/keypress`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/${sessionId}/keypress`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, modifiers }),
@@ -126,7 +147,7 @@ export const browserApi = {
 
   // Scroll
   scroll: async (sessionId, deltaX, deltaY) => {
-    const response = await fetch(`${BACKEND_URL}/browser/${sessionId}/scroll`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/browser/${sessionId}/scroll`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ delta_x: deltaX, delta_y: deltaY }),
@@ -136,8 +157,9 @@ export const browserApi = {
 
   // Create WebSocket connection
   createWebSocket: (sessionId) => {
+    // wsBaseUrl already includes the same base path as the REST API (e.g. '/api').
     const wsBaseUrl = getWsUrl();
-    return new WebSocket(`${wsBaseUrl}/api/browser/ws/${sessionId}`);
+    return new WebSocket(`${wsBaseUrl}/browser/ws/${sessionId}`);
   },
 };
 
@@ -145,7 +167,7 @@ export const browserApi = {
 export const extensionsApi = {
   // List all extensions
   listExtensions: async () => {
-    const response = await fetch(`${BACKEND_URL}/extensions`);
+    const response = await fetch(joinUrl(requireBackendUrl(), '/extensions'));
     if (!response.ok) {
       throw new Error('Failed to fetch extensions');
     }
@@ -154,7 +176,7 @@ export const extensionsApi = {
 
   // Load unpacked extension
   loadUnpacked: async (path) => {
-    const response = await fetch(`${BACKEND_URL}/extensions/load`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), '/extensions/load'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path }),
@@ -168,7 +190,7 @@ export const extensionsApi = {
 
   // Pack extension
   packExtension: async (path, keyPath = null) => {
-    const response = await fetch(`${BACKEND_URL}/extensions/pack`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), '/extensions/pack'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path, key_path: keyPath }),
@@ -182,7 +204,7 @@ export const extensionsApi = {
 
   // Toggle extension
   toggleExtension: async (extId, enabled) => {
-    const response = await fetch(`${BACKEND_URL}/extensions/${extId}/toggle`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/extensions/${extId}/toggle`), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled }),
@@ -195,7 +217,7 @@ export const extensionsApi = {
 
   // Remove extension
   removeExtension: async (extId) => {
-    const response = await fetch(`${BACKEND_URL}/extensions/${extId}`, {
+    const response = await fetch(joinUrl(requireBackendUrl(), `/extensions/${extId}`), {
       method: 'DELETE',
     });
     if (!response.ok) {
@@ -214,7 +236,7 @@ export const searchApi = {
     }
     
     const response = await fetch(
-      `${BACKEND_URL}/search/suggestions?q=${encodeURIComponent(query)}&limit=${limit}`
+      joinUrl(requireBackendUrl(), `/search/suggestions?q=${encodeURIComponent(query)}&limit=${limit}`)
     );
     if (!response.ok) {
       return { suggestions: [], query };

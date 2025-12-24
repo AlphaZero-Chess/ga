@@ -490,6 +490,7 @@ const VirtualBrowser = ({ defaultExpanded = true, onClose }) => {
         <Tooltip>
           <TooltipTrigger asChild>
             <button
+              data-testid="open-virtual-browser-button"
               onClick={() => setIsExpanded(true)}
               className={cn(
                 'fixed right-4 top-1/2 -translate-y-1/2 z-50',
@@ -512,6 +513,7 @@ const VirtualBrowser = ({ defaultExpanded = true, onClose }) => {
 
   return (
     <div
+      data-testid="virtual-browser-panel"
       className={cn(
         'fixed right-0 top-0 h-screen z-40 flex',
         'transition-all duration-300 ease-out',
@@ -539,15 +541,15 @@ const VirtualBrowser = ({ defaultExpanded = true, onClose }) => {
         {/* Window controls */}
         <div className="flex items-center justify-between px-3 py-2 bg-zinc-900 border-b border-zinc-800">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 cursor-pointer" onClick={onClose} />
-            <div className="w-3 h-3 rounded-full bg-amber-500 hover:bg-amber-400 cursor-pointer" onClick={() => setIsExpanded(false)} />
-            <div className="w-3 h-3 rounded-full bg-emerald-500 hover:bg-emerald-400 cursor-pointer" onClick={() => setIsFullscreen(!isFullscreen)} />
+            <div data-testid="window-close-button" className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 cursor-pointer" onClick={onClose} />
+            <div data-testid="window-minimize-button" className="w-3 h-3 rounded-full bg-amber-500 hover:bg-amber-400 cursor-pointer" onClick={() => setIsExpanded(false)} />
+            <div data-testid="window-fullscreen-toggle" className="w-3 h-3 rounded-full bg-emerald-500 hover:bg-emerald-400 cursor-pointer" onClick={() => setIsFullscreen(!isFullscreen)} />
           </div>
           
           <div className="flex items-center gap-1">
             <span className="text-xs text-zinc-500 mr-2">Virtual Chromium</span>
             {wsConnected && (
-              <span className="flex items-center gap-1 text-xs text-emerald-400 mr-2">
+              <span data-testid="live-status-indicator" className="flex items-center gap-1 text-xs text-emerald-400 mr-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 Live
               </span>
@@ -555,6 +557,7 @@ const VirtualBrowser = ({ defaultExpanded = true, onClose }) => {
             
             {/* Extensions toggle */}
             <button
+              data-testid="extensions-toggle-button"
               onClick={() => setShowExtensions(!showExtensions)}
               className={cn(
                 'p-2 rounded-lg transition-all',
@@ -569,6 +572,7 @@ const VirtualBrowser = ({ defaultExpanded = true, onClose }) => {
             
             {/* Collapse button */}
             <button
+              data-testid="browser-collapse-button"
               onClick={() => setIsExpanded(false)}
               className="p-2 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-all"
               title="Collapse"
@@ -578,6 +582,7 @@ const VirtualBrowser = ({ defaultExpanded = true, onClose }) => {
             
             {/* Fullscreen toggle */}
             <button
+              data-testid="browser-fullscreen-button"
               onClick={() => setIsFullscreen(!isFullscreen)}
               className="p-2 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-all"
               title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}

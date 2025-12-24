@@ -5,6 +5,7 @@ import { cn } from '../../lib/utils';
 const BrowserTab = ({ tab, isActive, onActivate, onClose, onDragStart, onDragOver, onDrop }) => {
   return (
     <div
+      data-testid={`browser-tab-${tab.id}`}
       draggable
       onDragStart={(e) => onDragStart(e, tab.id)}
       onDragOver={onDragOver}
@@ -36,6 +37,7 @@ const BrowserTab = ({ tab, isActive, onActivate, onClose, onDragStart, onDragOve
       
       {/* Close button */}
       <button
+        data-testid={`tab-close-button-${tab.id}`}
         onClick={(e) => {
           e.stopPropagation();
           onClose(tab.id);

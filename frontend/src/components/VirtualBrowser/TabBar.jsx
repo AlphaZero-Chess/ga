@@ -48,6 +48,7 @@ const TabBar = ({ tabs, activeTabId, onTabActivate, onTabClose, onNewTab, onTabs
       
       {/* New tab button */}
       <button
+        data-testid="new-tab-button"
         onClick={onNewTab}
         className={cn(
           'flex items-center justify-center w-8 h-8 mb-1 ml-1 rounded-lg',

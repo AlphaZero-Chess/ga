@@ -196,7 +196,7 @@ const BrowserViewport = ({
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-zinc-900 via-zinc-900 to-zinc-950 p-8">
         {/* Session status */}
-        <div className="absolute top-4 right-4 flex items-center gap-2 text-xs">
+        <div data-testid="newtab-session-status" className="absolute top-4 right-4 flex items-center gap-2 text-xs">
           {sessionId ? (
             <div className="flex items-center gap-2 bg-zinc-800/80 px-3 py-1.5 rounded-full">
               {wsConnected ? (
@@ -213,6 +213,7 @@ const BrowserViewport = ({
             </div>
           ) : (
             <button
+              data-testid="initialize-browser-button"
               onClick={onRetry}
               className="flex items-center gap-2 bg-zinc-800/80 px-3 py-1.5 rounded-full text-zinc-400 hover:text-zinc-200 transition-colors"
             >
@@ -232,6 +233,7 @@ const BrowserViewport = ({
         {/* Search box */}
         <div className="w-full max-w-2xl mb-12">
           <div 
+            data-testid="newtab-search-box"
             onClick={() => document.querySelector('[data-address-input]')?.focus()}
             className="flex items-center gap-4 bg-zinc-800/80 rounded-full px-6 py-4 border border-zinc-700/50 hover:border-zinc-600 transition-all cursor-text shadow-xl"
           >
@@ -244,6 +246,7 @@ const BrowserViewport = ({
         <div className="grid grid-cols-4 gap-6">
           {defaultNewTabContent.shortcuts.map((shortcut, index) => (
             <button
+              data-testid={`newtab-shortcut-${shortcut.name.toLowerCase().replace(/\s+/g, '-')}`}
               key={index}
               onClick={() => onNavigate(shortcut.url)}
               className="group flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-zinc-800/50 transition-all duration-200"
@@ -303,6 +306,7 @@ const BrowserViewport = ({
   // Browser viewport with screenshot
   return (
     <div
+      data-testid="browser-viewport"
       ref={viewportRef}
       className={cn(
         'flex-1 relative overflow-hidden bg-zinc-950 outline-none',
@@ -324,7 +328,6 @@ const BrowserViewport = ({
         setIsMouseDown(false);
       }}
       tabIndex={0}
-      data-testid="browser-viewport"
     >
       {screenshot ? (
         <img

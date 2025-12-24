@@ -62,6 +62,7 @@ const ExtensionsPanel = ({
           <h2 className="text-lg font-semibold text-zinc-100">Extensions</h2>
         </div>
         <button
+          data-testid="extensions-refresh-button"
           onClick={onRefresh}
           className="p-2 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-all"
           title="Refresh extensions"
@@ -77,6 +78,7 @@ const ExtensionsPanel = ({
           <span className="text-sm font-medium text-zinc-300">Developer mode</span>
         </div>
         <Switch
+          data-testid="developer-mode-switch"
           checked={developerMode}
           onCheckedChange={onToggleDeveloperMode}
           className="data-[state=checked]:bg-sky-500"
@@ -90,6 +92,7 @@ const ExtensionsPanel = ({
           <Dialog open={loadUnpackedOpen} onOpenChange={setLoadUnpackedOpen}>
             <DialogTrigger asChild>
               <Button 
+                data-testid="load-unpacked-open-button"
                 variant="outline" 
                 size="sm"
                 className="flex items-center gap-2 bg-zinc-800 border-zinc-600 hover:bg-zinc-700 text-zinc-200"
